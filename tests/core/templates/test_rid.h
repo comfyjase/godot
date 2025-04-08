@@ -38,6 +38,7 @@
 
 #include "tests/test_macros.h"
 
+#ifdef THREADS_ENABLED
 #ifdef SANITIZERS_ENABLED
 #ifdef __has_feature
 #if __has_feature(thread_sanitizer)
@@ -46,7 +47,8 @@
 #elif defined(__SANITIZE_THREAD__)
 #define TSAN_ENABLED
 #endif
-#endif
+#endif // SANITIZERS_ENABLED
+#endif // THREADS_ENABLED
 
 #ifdef TSAN_ENABLED
 #include <sanitizer/tsan_interface.h>
@@ -114,6 +116,7 @@ TEST_CASE("[RID] 'get_local_index'") {
 	CHECK(RID::from_uint64(4'294'967'297).get_local_index() == 1);
 }
 
+#ifdef THREADS_ENABLED
 // This case would let sanitizers realize data races.
 // Additionally, on purely weakly ordered architectures, it would detect synchronization issues
 // if RID_Alloc failed to impose proper memory ordering and the test's threads are distributed
@@ -249,6 +252,8 @@ TEST_CASE("[RID_Owner] Thread safety") {
 		tester.test();
 	}
 }
+#endif // THREADS_ENABLED
+
 } // namespace TestRID
 
 #endif // TEST_RID_H
